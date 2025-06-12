@@ -48,36 +48,38 @@ What cleanup.sh Does:
     Performs a Post-Cleanup Resource Check:Lists any remaining servers, IPs, networks, routers, subnets, security groups, and keypairs to confirm the cleanup was successful.
 
 
-Installation
+INSTALLATION/DEPLOYMENT PROCEDURE
 
     Clone the repository to your local machine.
 
-git clone https://github.com/suve19/Rev1-OpenStack-Deployment.git
+git clone https://github.com/H-mogusu/NSO_A2.git
 
     Navigate to the repository directory.
 
-cd Rev1-OpenStack-Deployment
+cd NSO_A2
+
+INSTALL
 
     Run the installation script.
 
-python3 install.py
+./install.sh openrc rev1 ssh_key
 
 This will install all the required packages and dependencies for the project.
 
-    Update the openrc file with your OpenStack authentication details.
-
-Operate
+OPERATE
 
 To deploy the solution, run the following command:
 
-python3 operate.py
+./operate.sh openrc rev1 ssh_key
 
 This will create the required network(s), router(s), nodes, and other required items to deploy the Rev1 service within the OpenStack environment.
-Cleanup
+Once the operation and monitoring of the system are complete, 
 
-Once the operation and monitoring of the system are complete, release and remove all allocated cloud resources by running the following command:
+CLEANUP
 
-python3 cleanup.py
+Release and remove all allocated cloud resources by running the following command:
+
+./cleanup.sh openrc rev1 ssh_key
 
 This will remove all allocated cloud resources, including nodes, security groups, router, subnet, network, floating IPs, and keypair.
 
