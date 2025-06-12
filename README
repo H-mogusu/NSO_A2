@@ -1,1 +1,49 @@
+BRIEF DESCRIPTION:
+
+This is a project to deploy resources in the cloud environment. The project is fully automated using different technologies such as Bash script, OpenStack, and Ansible.
+
+OpenStack is used to deploy different resources in the cloud such as network, subnet, router and virtual machines. Bash scripting is used to invoke all the OpenStack commands
+
+Ansible is later used to commission applications in virtual machines. Nodes availability checker is also deployed to monitor the availability of nodes and to dynamically add resources if new nodes are required and to remove excess nodes if fewer nodes are required. 
+
+After the resources are deployed. we will test the performance of the nodes using Apache benchmarking tool
+
+What install.sh does:
+
+This Bash script automates the deployment of an OpenStack infrastructure environment based on user-specified parameters:
+
+    Sources OpenStack credentials from an OpenRC file.
+
+    Creates essential network resources: network, subnet, router (with external gateway), and security group with predefined rules.
+
+    Generates or reuses an SSH keypair for server access.
+
+    Deploys a bastion and HAProxy server with floating IPs.
+
+    Scales development servers dynamically based on the number specified in servers.conf, attaching them to the network and securing them.
+
+What operate.sh does:
+
+This script is for operating and managing OpenStack cloud instances dynamically based on desired node count specified in a file called servers.conf.
+It continuously:
+
+    Creates new servers (nodes) if the current number is too low.
+
+    Deletes excess servers if too many exist.
+
+    Runs Ansible playbooks to configure them when the number changes.
+
+    Performs periodic checks and sleeps in a loop.
+    
+What cleanup.sh Does:
+
+    Deletes Active OpenStack Servers:Terminates all virtual servers currently running to free up resources.
+
+    Removes Floating IP Addresses:Releases any floating IPs that are still allocated in your OpenStack environment.
+
+    Clears Networks, Routers, and Subnets:Deletes all user-created networks, routers, and subnets (except for the default external network).
+
+    Deletes Security Groups (Except Default):Removes any custom security groups while preserving the system’s default one.
+
+    Performs a Post-Cleanup Resource Check:Lists any remaining servers, IPs, networks, routers, subnets, security groups, and keypairs to confirm the cleanup was successful.
 
