@@ -47,3 +47,37 @@ What cleanup.sh Does:
 
     Performs a Post-Cleanup Resource Check:Lists any remaining servers, IPs, networks, routers, subnets, security groups, and keypairs to confirm the cleanup was successful.
 
+
+Installation
+
+    Clone the repository to your local machine.
+
+git clone https://github.com/suve19/Rev1-OpenStack-Deployment.git
+
+    Navigate to the repository directory.
+
+cd Rev1-OpenStack-Deployment
+
+    Run the installation script.
+
+python3 install.py
+
+This will install all the required packages and dependencies for the project.
+
+    Update the openrc file with your OpenStack authentication details.
+
+Operate
+
+To deploy the solution, run the following command:
+
+python3 operate.py
+
+This will create the required network(s), router(s), nodes, and other required items to deploy the Rev1 service within the OpenStack environment.
+Cleanup
+
+Once the operation and monitoring of the system are complete, release and remove all allocated cloud resources by running the following command:
+
+python3 cleanup.py
+
+This will remove all allocated cloud resources, including nodes, security groups, router, subnet, network, floating IPs, and keypair.
+
