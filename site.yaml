@@ -1,1 +1,114 @@
+---
+- hosts: webservers
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Updating the repositories cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      
+    - name: Installing Python3-pip
+      apt:
+        name: python3-pip
+        state: present
+         
+    - name: Installing flask using 'pip3' executable
+      ansible.builtin.pip:
+        name: flask
+        executable: pip3
+        state: latest
+
+    - name: Uploading the application to the servers
+      copy:
+        src: ./service.py
+        dest: /home/ubuntu/service.py
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Running the application
+      shell: python3 /home/ubuntu/service.py
+      async: 86400
+      poll: 0
+      
+    - name: Install the snmpdaemon
+      apt:
+        name: snmpd
+        state: latest
+    
+    - name: Copy the snmpd config file
+      copy:
+        src: ./snmpd.conf
+        dest: /etc/snmp/snmpd.conf
+              
+    - name: Restarting the snmpdaemon
+      service:
+        name: snmpd
+        state: restarted    
+
+- hosts: proxyserver
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Updating repositories cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        
+    - name: Installing NGINX
+      apt:
+        name: nginx
+        state: present
+        
+    - name: Uploading the NGINX config file
+      template:
+        src: ./nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+    - name: Restarting NGINX
+      service:
+        name: nginx
+        state: restarted
+
+- hosts: bastion
+  any_errors_fatal: true
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Updating repositories cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Installing Python3-pip
+      apt:
+        name: python3-pip
+        state: present
+         
+    - name: Installing required modules
+      ansible.builtin.pip:
+        name:
+          - flask
+          - ping3
+        executable: pip3
+        state: latest
+
+    - name: Uploading the node availability checker application
+      copy:
+        src: ./alive.py
+        dest: /home/ubuntu/alive.py
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copying nodes.yaml
+      copy:
+        src: ./nodes.yaml
+        dest: /home/ubuntu/nodes.yaml
+
+    - name: Running the node availability checker application
+      shell: python3 /home/ubuntu/alive.py
+      async: 3600
+      poll: 0
 
