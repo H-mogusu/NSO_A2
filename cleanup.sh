@@ -235,9 +235,9 @@ else
 fi
 echo
 
-echo "======================================"
+echo "============================================"
 echo "$(date) Post-cleanup resource check completed"
 duration=$SECONDS
 echo "$(date) $((duration / 60)) minutes and $((duration % 60)) seconds used to for complete cleanup"
-echo "======================================"
+echo "============================================"
 
