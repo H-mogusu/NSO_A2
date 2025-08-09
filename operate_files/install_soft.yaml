@@ -1,0 +1,89 @@
+---
+- name: Deploy Python Service and SNMPD
+  hosts: service_workers
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Wait for all hosts to be reachable
+      wait_for_connection:
+        delay: 5
+        timeout: 5
+      retries: 10
+      delay: 5
+      register: wait_result
+      until: wait_result is success
+      any_errors_fatal: true
+
+    - name: Gather facts
+      setup:
+  tasks:
+    - name: Transfer service.py to remote server
+      ansible.builtin.copy:
+        src: ../storage/service.py
+        dest: /home/ubuntu/service.py
+        mode: '0755'
+      retries: 5
+      delay: 5
+
+    - name: Update package list and install Python 3 and pip
+      ansible.builtin.apt:
+        update_cache: yes
+        name:
+          - python3
+          - python3-pip
+          - snmpd
+        state: present
+
+    - name: Transfer requirements.txt to remote server
+      ansible.builtin.copy:
+        src: ../storage/requirements.txt
+        dest: /home/ubuntu/requirements.txt
+
+    - name: Install Python packages from requirements.txt
+      ansible.builtin.command:
+        cmd: python3 -m pip install -r /home/ubuntu/requirements.txt
+
+    - name: Run gunicorn with service.py in daemon mode
+      ansible.builtin.command:
+        cmd: gunicorn -D -b 0.0.0.0:5000 service:app
+
+
+    - name: Configure SNMPD to listen on all interfaces
+      ansible.builtin.shell:
+        cmd: sed -i 's/^agentaddress  127\.0\.0\.1,\[::1\]$/agentaddress  0.0.0.0,[::1]/' /etc/snmp/snmpd.conf
+
+    - name: Ensure snmpd is running
+      ansible.builtin.service:
+        name: snmpd
+        state: restarted
+        enabled: true
+
+
+- name: Install and Configure NGINX on Proxy Servers
+  hosts: proxy
+  become: true
+  gather_facts: yes
+  tasks:
+    - name: Install NGINX
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Configure NGINX for SNMP Load Balancing
+      ansible.builtin.template:
+        src: ../storage/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+    - name: Restarting NGINX
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: Test NGINX Configuration
+      ansible.builtin.command:
+        cmd: nginx -t
+
+    - name: Restart NGINX
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
